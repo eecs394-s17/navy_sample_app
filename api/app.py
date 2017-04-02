@@ -1,7 +1,10 @@
 from flask import Flask
 from flask_restful import Resource, Api, reqparse
+from flask import abort
+
 import csv
 
+import uuid
 
 
 app = Flask(__name__)
@@ -16,7 +19,6 @@ class Notes(Resource):
         self.parser = reqparse.RequestParser()
         self.parser.add_argument('notes', type=str, required=True)
 
-        
 
     def get(self):
         """
@@ -29,22 +31,39 @@ class Notes(Resource):
                     for row in reader:
                         # TODO: strip excess spaces
                         notes.append(row)
+        # TODO: should we get the image using base64?
+        # or should we go straight for hosting
         notes_json = { "notes" : notes }
         return notes_json
 
     def post(self):
         """
+        a post endpoint that adds notes
         """
+
         args = self.parser.parse_args()
         notes = args["notes"]
 
-        print notes
+        # try to save base64 image
+        image = None
+        try:
+            image = base64.decodestring(data)
+        except:
+            print "Could not decode base64 image from json"
+            abort(400)
 
+        # save base64 to somewhere on machine
+        unique_filename = uuid.uuid4()
+        print unique_filename
+        with open(unique_filename, 'wb') as f:
+            f.write(image)
+
+        # write file where image was saved to csv
         with open(self.notes_filepath, 'a') as csvfile:
             writer = csv.writer(csvfile)
-            writer.writerow([notes])
+            writer.writerow([unique_filename])
 
-        return "Notes Uploaded"
+        return "Notes Saved"
 
 
 api.add_resource(Notes, "/api/v1/notes")
