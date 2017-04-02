@@ -8,6 +8,11 @@ import uuid
 
 import base64
 
+import boto3
+import sys, os
+from os import listdir
+from os.path import isfile, join
+from botocore.client import ClientError
 
 app = Flask(__name__)
 api = Api(app)
@@ -16,6 +21,10 @@ api = Api(app)
 class Notes(Resource):
 
     def __init__(self):
+
+        # Hit AWS
+        self.s3 = boto3.resource('s3')
+        self.client = boto3.client('s3')
 
         self.notes_filepath = "notes.csv"
         self.parser = reqparse.RequestParser()
@@ -52,10 +61,11 @@ class Notes(Resource):
         # save base64 to somewhere on machine
         # TODO: handle different filetypes
         unique_filename = str(uuid.uuid4()) + '.jpg'
-        print unique_filename
-        with open(unique_filename, 'wb') as f:
-            f.write(image)
-
+        # Upload to AWS bucket
+        bucket = self.s3.Bucket("navy-images")
+        exists = True
+        self.s3.meta.client.head_bucket(Bucket=bucket.name)
+        s3.Bucket(bucket.name).put_object(Key=unique_filename, Body=image)
         # write file where image was saved to csv
         with open(self.notes_filepath, 'a') as csvfile:
             writer = csv.writer(csvfile)
