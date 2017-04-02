@@ -13,6 +13,7 @@ $ virtualenv api
 ```
 $ pip install -r requirements.txt
 ```
+* the permissions are pretty lenient at this point...(shhh don't tell). Just create some aws credentials and configurue them according to this
 
 ## Run
 * start up the environment
