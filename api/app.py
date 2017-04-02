@@ -6,6 +6,8 @@ import csv
 
 import uuid
 
+import base64
+
 
 app = Flask(__name__)
 api = Api(app)
@@ -45,15 +47,11 @@ class Notes(Resource):
         notes = args["notes"]
 
         # try to save base64 image
-        image = None
-        try:
-            image = base64.decodestring(data)
-        except:
-            print "Could not decode base64 image from json"
-            abort(400)
+        image = base64.decodestring(notes)
 
         # save base64 to somewhere on machine
-        unique_filename = uuid.uuid4()
+        # TODO: handle different filetypes
+        unique_filename = str(uuid.uuid4()) + '.jpg'
         print unique_filename
         with open(unique_filename, 'wb') as f:
             f.write(image)
