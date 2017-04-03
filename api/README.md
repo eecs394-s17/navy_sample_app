@@ -30,3 +30,4 @@ $ python app.py
 ```
 $ http://127.0.0.1:5000/api/v1/notes
 ```
+* Now you should see some json in your browser
