@@ -42,8 +42,7 @@ class Notes(Resource):
                     for row in reader:
                         # TODO: strip excess spaces
                         notes.append(row)
-        # TODO: should we get the image using base64?
-        # or should we go straight for hosting
+
         notes_json = { "notes" : notes }
         return notes_json
 
@@ -60,18 +59,23 @@ class Notes(Resource):
 
         # save base64 to somewhere on machine
         # TODO: handle different filetypes
-        unique_filename = str(uuid.uuid4()) + '.jpg'
+        unique_filename = str(uuid.uuid4())
         # Upload to AWS bucket
-        bucket = self.s3.Bucket("navy-images")
+        bucket = self.s3.Bucket("team-navy")
         exists = True
         self.s3.meta.client.head_bucket(Bucket=bucket.name)
-        s3.Bucket(bucket.name).put_object(Key=unique_filename, Body=image)
+        self.s3.Bucket(bucket.name).put_object(Key=unique_filename, Body=image)
         # write file where image was saved to csv
         with open(self.notes_filepath, 'a') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow([unique_filename])
+        link_name = "https://s3.amazonaws.com/"+bucket.name+"/"+unique_filename
 
-        return "Notes Saved"
+        info = {"bucket": "team-navy",
+                "name": unique_filename}
+
+        return info
+
 
 
 api.add_resource(Notes, "/api/v1/notes")
