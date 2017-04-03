@@ -38,7 +38,15 @@ class Notes(Resource):
         # TODO: should we get the image using base64?
         # or should we go straight for hosting
 
-        notes_json = { "notes" : notes }
+        images = []
+        for note in notes:
+            note_path = note[0] # just cuz its csv
+            with open(note_path, "rb") as f:
+                data = f.read()
+                image = base64.encodestring(data)
+                images.append(image)
+
+        notes_json = { "notes" : images }
 
         return notes_json
 
